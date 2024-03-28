@@ -35,6 +35,16 @@ int measures = 100;
 int measures2 = 100;
 int measures3 = 100;
 
+//WEBSOCKETS THINGS
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+
+AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
+
+unsigned long lastTime = 0;
+const unsigned long interval = 1000;  // 1000 milliseconds = 1 second
+
 
 
 #endif

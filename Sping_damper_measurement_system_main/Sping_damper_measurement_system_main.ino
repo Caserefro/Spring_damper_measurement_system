@@ -49,14 +49,13 @@ void ReadData(void *parameters) {
   }
 }
 
-//checks if 5 pairs of (data, Timestamp) are in queue, if so, publish to ws
+//checks for pairs of (data, Timestamp) in queue, if so create a string that will be published to ws
 void PublishData(void *parameters) {
   while (1) {
     if (xQueueReceive(msg_queue, (void *)&Sensordata, 7) == pdTRUE) {
       wspackage += (String(Sensordata.zGvalue) + "," + String(Sensordata.Timestamp) + ",");
-      if (wspackage.length() > 500) {
-        
-        
+      if (wspackage.length() > 300) {
+        ws.textAll(wspackage);
         Serial.println(wspackage);
         wspackage = "";
       }
@@ -70,6 +69,21 @@ void setup() {
   Serial.begin(115200);
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   Wire.begin();
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi..");
+  }
+
+  Serial.println(WiFi.localIP());
+
+  ws.onEvent(onWsEvent);
+  server.addHandler(&ws);
+
+  server.begin();
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
+
   init_FIRST_MPU6500();
   enableINTmpu6500(csPinMPU1);
   vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -90,7 +104,7 @@ void setup() {
   // Start task to calculate average. Save handle for use with notifications.
   xTaskCreate(PublishData,
               "Publish data",
-              1024,
+              2000,
               NULL,
               1,
               &Publish_data);
@@ -103,6 +117,7 @@ void setup() {
   timerAlarmEnable(timer);
   timerStart(timer);
 */
+
   // Delete "setup and loop" task
   vTaskDelete(NULL);
 }
