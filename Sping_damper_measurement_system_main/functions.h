@@ -3,7 +3,6 @@
 #include "definitions.h"
 
 
-
 /*
 void IRAM_ATTR SECOND_IMU_ISR_FLAG() {
   SECOND_IMUReadingAvailable = true;
@@ -37,19 +36,19 @@ void writeMPU9250Registerfunc(SPIClass* spi, uint8_t csPin, uint8_t reg, uint8_t
 
 void enableINTmpu6500(uint8_t csPin) {
   uint8_t regVal;
-  regVal = readMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG);  //POLARITY
+  regVal = readMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG);  //POLARITY 0x02
   regVal &= ~(0x80);
   writeMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG, regVal);
 
-  regVal = readMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG);  //LATCH
+  regVal = readMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG);  //LATCH    0x02
   regVal &= ~(0x20);
   writeMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG, regVal);
 
-  regVal = readMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG);  //CLEAR INT BY ANY
+  regVal = readMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG);  //CLEAR INT BY ANY  0x12
   regVal |= 0x10;
   writeMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_PIN_CFG, regVal);
 
-  regVal = readMPU9250Registerfunc(&SPI, csPin, 0x40);  //ENABLE INT
+  regVal = readMPU9250Registerfunc(&SPI, csPin, 0x40);                  //ENABLE INT 0x49
   regVal |= 0x40;
   writeMPU9250Registerfunc(&SPI, csPin, REGISTER_INT_ENABLE, 0x49);
 }
@@ -79,7 +78,7 @@ void init_FIRST_MPU6500() {
   FIRST_MPU6500.setGyrDLPF(MPU6500_DLPF_6);
   FIRST_MPU6500.setSampleRateDivider(5);
   FIRST_MPU6500.setGyrRange(MPU6500_GYRO_RANGE_250);
-  FIRST_MPU6500.setAccRange(MPU6500_ACC_RANGE_2G);
+  FIRST_MPU6500.setAccRange(MPU6500_ACC_RANGE_4G);
   FIRST_MPU6500.enableAccDLPF(true);
   FIRST_MPU6500.setAccDLPF(MPU6500_DLPF_6);
   //FIRST_MPU6500.enableAccAxes(MPU6500_ENABLE_XYZ);
