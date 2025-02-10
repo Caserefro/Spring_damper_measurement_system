@@ -25,7 +25,7 @@ void ReadData(void *parameters) {
     Sensordata.zGvalue = gValue.z;
     lastread = millis() - lastread;
     Sensordata.Timestamp = lastread;
-    xQueue*end(msg_queue, (void *)&Sensordata, 0) == pdTRUE;
+    xQueueSend(msg_queue, (void *)&Sensordata, 0) == pdTRUE;
     lastread = millis();
   }
 }
@@ -33,7 +33,7 @@ void ReadData(void *parameters) {
 //checks for pairs of (data, Timestamp) in queue, if so create a string that will be published to ws
 void PublishData(void *parameters) {
   while (1) {
-    if (xQueueReceive(msg_queue, (void *)&Sensordata, 7) == pdTRUE) {
+    if (xQueueReceive(msg_queue, (void *)&Sensordata, 7) == pdTRUE) { // 7 bc 7ms takes for one read to be done. (could be less, not tested.)
       wspackage += (String(Sensordata.zGvalue) + "," + String(Sensordata.Timestamp) + ",");
       if (wspackage.length() > 300) {
         ws.textAll(wspackage);
@@ -73,8 +73,6 @@ void setup() {
   // Create message queue before it is used
   msg_queue = xQueueCreate(MSG_QUEUE_LEN, sizeof(Sensordata));
 
-  // Start task to handle command line interface events. Let's set it at a
-  // higher priority but only run it once every 20 ms.
   xTaskCreate(ReadData,
               "Read data",
               1024,
@@ -82,7 +80,6 @@ void setup() {
               1,
               &Read_Data);
 
-  // Start task to calculate average. Save handle for use with notifications.
   xTaskCreate(PublishData,
               "Publish data",
               2000,
